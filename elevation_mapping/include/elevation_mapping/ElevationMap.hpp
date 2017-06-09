@@ -65,6 +65,13 @@ class ElevationMap
   bool add(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointCloud, Eigen::VectorXf& pointCloudVariances);
 
   /*!
+   * Remove measurements from the elevation map.
+   * @param pointCloud the point cloud data to be removed.
+   * @return true if successful.
+   */
+  bool removeInvalid(const pcl::PointCloud<pcl::PointXYZ>::Ptr pointCloud);
+
+  /*!
    * Update the elevation map with variance update data.
    * @param varianceUpdate the variance update in vertical direction.
    * @param horizontalVarianceUpdateX the variance update in horizontal x-direction.

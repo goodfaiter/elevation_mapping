@@ -157,6 +157,30 @@ bool ElevationMap::add(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointCloud, 
   return true;
 }
 
+bool ElevationMap::removeInvalid(const pcl::PointCloud<pcl::PointXYZ>::Ptr pointCloud)
+{
+  float res = rawMap_.getResolution();
+  //  This could be future parameter
+  // TODO: Add this to parameters
+  // TODO: This is decently fast but need to look into more efficient approach
+  int pointPadding_ = 2;
+
+  for (unsigned int i = 0; i < pointCloud->size(); ++i) {
+    auto& point = pointCloud->points[i];
+    for (int i = -pointPadding_; i <= pointPadding_; ++i)
+    {
+      for (int j = -pointPadding_; j <= pointPadding_; ++j)
+      {
+        Index index;
+        Position position(point.x + i*res, point.y + j*res);
+        if (!rawMap_.getIndex(position, index)) continue; // Skip this point if it does not lie within the elevation map.
+        auto& elevation = rawMap_.at("elevation", index);
+        elevation = NAN;
+      }
+    }
+  }
+}
+
 bool ElevationMap::update(const grid_map::Matrix& varianceUpdate, const grid_map::Matrix& horizontalVarianceUpdateX,
                           const grid_map::Matrix& horizontalVarianceUpdateY, const grid_map::Matrix& horizontalVarianceUpdateXY, const ros::Time& time)
 {

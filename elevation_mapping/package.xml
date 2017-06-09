@@ -22,4 +22,5 @@
   <depend>tf</depend>
   <depend>tf_conversions</depend>
   <depend>eigen_conversions</depend>
+  <depend>m545_msgs</depend>
 </package>

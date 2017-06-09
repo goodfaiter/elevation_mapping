@@ -60,11 +60,18 @@ ElevationMapping::ElevationMapping(ros::NodeHandle& nodeHandle)
   readParameters();
   pointCloudSubscriber_ = nodeHandle_.subscribe(pointCloudTopic_, 1, &ElevationMapping::pointCloudCallback, this);
   if (!robotPoseTopic_.empty()) {
+    // robotPoseSubscriber_ = nodeHandle_.subscribe(robotPoseTopic_, 1, &ElevationMapping::robotPoseCallback, this);
     robotPoseSubscriber_.subscribe(nodeHandle_, robotPoseTopic_, 1);
     robotPoseCache_.connectInput(robotPoseSubscriber_);
     robotPoseCache_.setCacheSize(robotPoseCacheSize_);
   } else {
     ignoreRobotMotionUpdates_ = true;
+  }
+
+  int useDynamicPointsCloud_ = true;
+  if (useDynamicPointsCloud_ == true)
+  {
+    invalidPointCloudSubscriber_ = nodeHandle_.subscribe("/icp_mapper/invalid_points", 1, &ElevationMapping::invalidPointCloudCallback, this);
   }
 
   mapUpdateTimer_ = nodeHandle_.createTimer(maxNoUpdateDuration_, &ElevationMapping::mapUpdateTimerCallback, this, true, false);
@@ -261,6 +268,10 @@ void ElevationMapping::pointCloudCallback(
     return;
   }
 
+  //////// M545 ADDITIONS START
+  map_.clear();
+  //////// M545 ADDTIONS END
+
   // Add point cloud to elevation map.
   if (!map_.add(pointCloudProcessed, measurementVariances)) {
     ROS_ERROR("Adding point cloud to elevation map failed.");
@@ -276,6 +287,32 @@ void ElevationMapping::pointCloudCallback(
   }
 
   resetMapUpdateTimer();
+}
+
+void ElevationMapping::invalidPointCloudCallback(
+    const sensor_msgs::PointCloud2& invalidPointCloud)
+{
+  // boost::recursive_mutex::scoped_lock scopedLock(map_.getRawDataMutex());
+
+  pcl::PCLPointCloud2 pcl_pc;
+  pcl_conversions::toPCL(invalidPointCloud, pcl_pc);
+  PointCloud<PointXYZ>::Ptr pointCloud(new PointCloud<PointXYZ>);
+  pcl::fromPCLPointCloud2(pcl_pc, *pointCloud);
+  map_.removeInvalid(pointCloud);
+}
+
+void ElevationMapping::robotPoseCallback(
+    const m545_msgs::M545State& m545_state)
+{
+
+  geometry_msgs::PoseWithCovarianceStamped poseStamped;
+  poseStamped.header.stamp = m545_state.stamp;
+  poseStamped.header.seq = m545_state.seq;
+  poseStamped.header.frame_id = "BASE";
+  poseStamped.pose.pose = m545_state.chassis_pose;
+  poseStamped.pose.covariance.fill(0);
+
+  // robotPoseCache_.add(poseStamped);
 }
 
 void ElevationMapping::mapUpdateTimerCallback(const ros::TimerEvent&)

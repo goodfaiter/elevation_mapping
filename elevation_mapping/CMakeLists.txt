@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   eigen_conversions
   kindr
   kindr_ros
+  m545_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -52,6 +53,7 @@ catkin_package(
 	    eigen_conversions
 	    kindr
 	    kindr_ros
+      m545_msgs
 #  DEPENDS system_lib
 )
 

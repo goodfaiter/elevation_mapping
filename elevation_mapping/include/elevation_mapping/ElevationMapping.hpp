@@ -38,6 +38,9 @@
 // Boost
 #include <boost/thread.hpp>
 
+// M545 msgs
+#include <m545_msgs/M545State.h>
+
 
 namespace elevation_mapping {
 
@@ -65,6 +68,16 @@ class ElevationMapping
    * @param pointCloud the point cloud to be fused with the existing data.
    */
   void pointCloudCallback(const sensor_msgs::PointCloud2& pointCloud);
+
+  /*!
+   * Callback function for new data to be removed to the elevation map.
+   * @param pointCloud the point cloud to be removed from existing data.
+   */
+  void invalidPointCloudCallback(const sensor_msgs::PointCloud2& pointCloud);
+
+  /*!
+   */
+  void robotPoseCallback(const m545_msgs::M545State& m545_state);
 
   /*!
    * Callback function for the update timer. Forces an update of the map from
@@ -169,6 +182,8 @@ class ElevationMapping
   //! ROS subscribers.
   ros::Subscriber pointCloudSubscriber_;
   message_filters::Subscriber<geometry_msgs::PoseWithCovarianceStamped> robotPoseSubscriber_;
+  ros::Subscriber invalidPointCloudSubscriber_;
+  // ros::Subscriber robotPoseSubscriber_;
 
   //! ROS service servers.
   ros::ServiceServer fusionTriggerService_;
