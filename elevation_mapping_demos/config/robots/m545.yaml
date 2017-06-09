@@ -1,0 +1,9 @@
+point_cloud_topic: /icp_mapper/reference_point_cloud # /icp_mapper/input_point_cloud #/pointcloud_stitching/stitched_velodyne_points
+map_frame_id: "odom"
+robot_base_frame_id: "BASE"
+robot_pose_with_covariance_topic: "/tf_publisher/pose"
+robot_pose_cache_size: 100
+track_point_frame_id: "odom"
+track_point_x: 0.0
+track_point_y: 0.0
+track_point_z: 0.0
